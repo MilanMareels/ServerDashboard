@@ -43,7 +43,7 @@ namespace ServerDashboardClient.Components.Pages
             }
         }
 
-        // When Page closes Timer and Thread cancels.
+        // When Page closes Timer cancels. Clean up.
         public void Dispose()
         {
             _cts.Cancel();
