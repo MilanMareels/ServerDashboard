@@ -13,6 +13,18 @@ namespace ServerDashboardApi.Repositories
         {
             var data = _caching.GetCurrentTemperature();
 
+            if (data == null)
+            {
+                return new DashBoardDTO
+                {
+                    Temp = 0,
+                    MaxTemp = 0,
+                    MinTemp = 0,
+                    BackFans = "OFF",
+                    TopAndBottomFans = "OFF"
+                };
+            }
+
             return new DashBoardDTO
             {
                 Temp = data.Temp,
