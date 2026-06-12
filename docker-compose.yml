@@ -11,5 +11,35 @@ services:
       - sqldata:/var/opt/mssql
     restart: unless-stopped
 
+  api:
+    build:
+      context: .
+      dockerfile: ServerDashboardApi/Dockerfile
+    container_name: server-dashboard-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Server=db;Database=ServerDasboardDb;User Id=sa;Password=SuperGeheimWachtwoord123!;TrustServerCertificate=true;
+    ports:
+      - "5050:8080"
+    devices:
+      - "/dev/ttyACM0:/dev/ttyACM0"
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  client:
+    build:
+      context: .
+      dockerfile: ServerDashboardClient/Dockerfile
+    container_name: server-dashboard-client
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ApiBaseUrl=http://api:8080/api/
+    depends_on:
+      - api
+    restart: unless-stopped
+
 volumes:
   sqldata:

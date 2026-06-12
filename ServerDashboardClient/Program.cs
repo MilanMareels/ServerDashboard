@@ -9,7 +9,8 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddHttpClient<ITemperatureService, TemperatureService>(client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5120/api/");
+    var apiUrl = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5120/api/";
+    client.BaseAddress = new Uri(apiUrl);
 });
 
 var app = builder.Build();
