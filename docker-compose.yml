@@ -18,7 +18,7 @@ services:
     container_name: server-dashboard-api
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__DefaultConnection=Server=db;Database=ServerDashboardDb;User Id=sa;Password=SuperGeheimWachtwoord123!;TrustServerCertificate=true;
+      - ConnectionStrings__DefaultConnection=Server=db;Database=ServerDasboardDb;User Id=sa;Password=SuperGeheimWachtwoord123!;TrustServerCertificate=true;
     ports:
       - "5050:8080"
     devices:
