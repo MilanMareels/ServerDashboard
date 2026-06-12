@@ -116,7 +116,6 @@ namespace ServerDashboardApi.Services
             }
         }
 
-
         // Save to DB helper. Save to DB between 5 min.
         private async Task SaveDataToDb(MicroBit microBit, CancellationToken cancellationToken)
         {
