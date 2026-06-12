@@ -79,15 +79,21 @@ namespace ServerDashboardApi.Services
             {
                 try
                 {
-                    using var usb = new SerialPort(PortName) { DtrEnable = true, RtsEnable = true};
+                    using var usb = new SerialPort(PortName)
+                    {
+                        BaudRate = 115200,
+                        DtrEnable = true,
+                        RtsEnable = true
+                    };
                     usb.Open();
+                    _logger.LogInformation($"Verbonden met Micro:bit op {PortName}");
 
                     while (!cancellationToken.IsCancellationRequested)
                     {
                         string line = usb.ReadLine();
                         var data = JsonSerializer.Deserialize<MicroBit>(line, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-                        if (data == null) return;
+                        if (data == null) continue;
 
                         if (data.Temp < minTemp) minTemp = data.Temp;
                         if (data.Temp > maxTemp) maxTemp = data.Temp;
@@ -101,18 +107,16 @@ namespace ServerDashboardApi.Services
                             TopAndBottomFans = $"{(data.Temp > 30 ? "ON" : "OFF")}"
                         };
 
-                        if (data != null)
-                        {
-                            _logger.LogInformation($"{data}");
-
-                            _cacheService.SetTemperatureCache(metrics);
-
-                            await SaveDataToDb(data, cancellationToken);
-                        }
+                        _logger.LogInformation($"Nieuwe temperatuur gelezen: {data.Temp}°C");
+                        _cacheService.SetTemperatureCache(metrics);
+                        await SaveDataToDb(data, cancellationToken);
                     }
-                    
                 }
-                catch {}
+                catch (Exception ex)
+                {
+                    _logger.LogWarning($"Probleem met USB verbinding: {ex.Message}. Opnieuw proberen in 5 seconden...");
+                    await Task.Delay(5000, cancellationToken);
+                }
             }
         }
 
