@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ServerDashboardApi/ServerDashboardApi.csproj" />
+  <Project Path="ServerDashboardClient/ServerDashboardClient.csproj" />
+</Solution>
