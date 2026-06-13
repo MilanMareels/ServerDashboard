@@ -103,8 +103,8 @@ namespace ServerDashboardApi.Services
                             Temp = data.Temp,
                             MinTemp = minTemp,
                             MaxTemp = maxTemp,
-                            BackFans = $"{(data.Temp > 25 ? "ON" : "OFF")}",
-                            TopAndBottomFans = $"{(data.Temp > 30 ? "ON" : "OFF")}"
+                            BackFans = data.BackFans,
+                            TopAndBottomFans = data.TopAndBottomFans
                         };
 
                         _logger.LogInformation($"Nieuwe temperatuur gelezen: {data.Temp}°C");
