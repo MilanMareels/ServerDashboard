@@ -85,7 +85,7 @@
                                     @foreach (var ev in serverEvents)
                                     {
                                         <tr>
-                                            <td class="text-muted ps-3 fw-medium">@ev.Date.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                            <td class="text-muted ps-3 fw-medium">@ev.Date.AddHours(2).ToString("yyyy-MM-dd HH:mm:ss")</td>
                                             <td>
                                                 <span class="badge rounded-pill @(ev.Severity == "Critical" ? "bg-danger text-white" : "bg-warning") px-3 py-2">
                                                     @ev.Severity
