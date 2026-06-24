@@ -125,7 +125,7 @@ namespace ServerDashboardApi.Services
         {
             bool isEvent = microBit.Temp > 30;
 
-            if (isEvent || DateTime.UtcNow >= _lastSaveTime.AddMinutes(5))
+            if (DateTime.UtcNow >= _lastSaveTime.AddMinutes(5))
             {
                 using var scope = _scopeFactory.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<DashBoardContext>();
