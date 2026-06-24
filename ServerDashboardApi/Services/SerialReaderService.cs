@@ -123,7 +123,7 @@ namespace ServerDashboardApi.Services
         // Save to DB helper. Save to DB between 5 min.
         private async Task SaveDataToDb(MicroBit microBit, CancellationToken cancellationToken)
         {
-            bool isEvent = microBit.Temp >= 35;
+            bool isEvent = microBit.Temp > 30;
 
             if (isEvent || DateTime.UtcNow >= _lastSaveTime.AddMinutes(5))
             {
