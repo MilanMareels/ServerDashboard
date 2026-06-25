@@ -22,8 +22,9 @@ builder.Services.AddScoped<ITemperatureService, TemperatureService>();
 // Repo's
 builder.Services.AddScoped<ITemperatureRepo, TemperatureRepo>();
 
-// Background Service for USB
-builder.Services.AddHostedService<SerialReaderService>();
+// Background Services
+builder.Services.AddHostedService<SerialReaderService>(); // USB
+builder.Services.AddHostedService<DataCleanupService>(); // CleanUp
 
 // Caching
 builder.Services.AddMemoryCache();

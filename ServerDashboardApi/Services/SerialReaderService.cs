@@ -1,4 +1,5 @@
-﻿using ServerDashboardApi.Context;
+﻿using Microsoft.EntityFrameworkCore;
+using ServerDashboardApi.Context;
 using ServerDashboardApi.Models;
 using System;
 using System.IO.Ports;
@@ -139,6 +140,20 @@ namespace ServerDashboardApi.Services
 
                 await db.SaveChangesAsync(cancellationToken);
                 _lastSaveTime = DateTime.UtcNow;
+            }
+        }
+
+        private async Task CleanupEvents(DashBoardContext db)
+        {
+            var oldEvents = await db.Events
+                .OrderByDescending(e => e.Date)
+                .Skip(30)
+                .ToListAsync();
+
+            if (oldEvents.Any())
+            {
+                db.Events.RemoveRange(oldEvents);
+                await db.SaveChangesAsync();
             }
         }
     }
