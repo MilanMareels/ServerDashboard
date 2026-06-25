@@ -21,6 +21,8 @@ services:
       - ConnectionStrings__DefaultConnection=Server=db;Database=ServerDashboardDb;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=true;
     ports:
       - "5050:8080"
+    devices:
+      - "/dev/ttyACM0:/dev/ttyACM0"
     depends_on:
       - db
     restart: unless-stopped
