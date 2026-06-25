@@ -4,7 +4,7 @@ services:
     container_name: sql-database
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=SuperGeheimWachtwoord123!
+      - MSSQL_SA_PASSWORD=${SA_PASSWORD}
     ports:
       - "1433:1433"
     volumes:
@@ -18,11 +18,9 @@ services:
     container_name: server-dashboard-api
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__DefaultConnection=Server=db;Database=ServerDashboardDb;User Id=sa;Password=SuperGeheimWachtwoord123!;TrustServerCertificate=true;
+      - ConnectionStrings__DefaultConnection=Server=db;Database=ServerDashboardDb;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=true;
     ports:
       - "5050:8080"
-    devices:
-      - "/dev/ttyACM0:/dev/ttyACM0"
     depends_on:
       - db
     restart: unless-stopped
