@@ -14,7 +14,7 @@ namespace ServerDashboardApi.Services
                 SlidingExpiration = TimeSpan.FromSeconds(10)
             });
 
-            _logger.LogDebug($"Cache updated with new temperature: {metrics.Temp}°C");
+            _logger.LogInformation($"Cache updated with new temperature: {metrics.Temp}°C");
         }
 
         public CachedSensorMetrics GetCurrentTemperature()
