@@ -87,7 +87,7 @@ namespace ServerDashboardApi.Services
                         RtsEnable = true
                     };
                     usb.Open();
-                    _logger.LogInformation($"Verbonden met Micro:bit op {PortName}");
+                    _logger.LogInformation($"Connected to Micro:bit on {PortName}");
 
                     while (!cancellationToken.IsCancellationRequested)
                     {
@@ -108,14 +108,14 @@ namespace ServerDashboardApi.Services
                             TopAndBottomFans = data.TopAndBottomFans
                         };
 
-                        _logger.LogInformation($"Nieuwe temperatuur gelezen: {data.Temp}°C");
+                        _logger.LogInformation($"New temperature read: {data.Temp}°C");
                         _cacheService.SetTemperatureCache(metrics);
                         await SaveDataToDb(data, cancellationToken);
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning($"Probleem met USB verbinding: {ex.Message}. Opnieuw proberen in 5 seconden...");
+                    _logger.LogWarning($"Problem with USB connection: {ex.Message}. Try again in 5 seconds...");
                     await Task.Delay(5000, cancellationToken);
                 }
             }
@@ -128,6 +128,8 @@ namespace ServerDashboardApi.Services
 
             if (DateTime.UtcNow >= _lastSaveTime.AddMinutes(5))
             {
+                _logger.LogInformation($"5 minutes elapsed: Time to write data to database! (Temp: {microBit.Temp}°C)");
+
                 using var scope = _scopeFactory.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<DashBoardContext>();
 
@@ -135,25 +137,14 @@ namespace ServerDashboardApi.Services
 
                 if (isEvent)
                 {
+                    _logger.LogWarning($"Caution: High temperature ({microBit.Temp}°C). Is saved as an Event in the database!");
                     db.Events.Add(new Event { Date = DateTime.UtcNow, Temp = microBit.Temp, Severity = microBit.Temp > 40 ? "Critical" : "Warning" });
                 }
 
                 await db.SaveChangesAsync(cancellationToken);
+
+                _logger.LogInformation("Data successfully written to the database.");
                 _lastSaveTime = DateTime.UtcNow;
-            }
-        }
-
-        private async Task CleanupEvents(DashBoardContext db)
-        {
-            var oldEvents = await db.Events
-                .OrderByDescending(e => e.Date)
-                .Skip(30)
-                .ToListAsync();
-
-            if (oldEvents.Any())
-            {
-                db.Events.RemoveRange(oldEvents);
-                await db.SaveChangesAsync();
             }
         }
     }
