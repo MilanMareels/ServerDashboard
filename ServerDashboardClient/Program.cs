@@ -7,6 +7,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents(); // Server Side rendering!
 
+builder.Services.AddHttpClient<IInfrastructureClientService, InfrastructureClientService>(client =>
+{
+    var apiUrl = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5120/api/";
+    client.BaseAddress = new Uri(apiUrl);
+});
+
 builder.Services.AddHttpClient<ITemperatureService, TemperatureService>(client =>
 {
     var apiUrl = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5120/api/";

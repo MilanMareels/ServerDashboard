@@ -18,9 +18,11 @@ builder.Services.AddDbContext<DashBoardContext>(options =>
 
 // Services
 builder.Services.AddScoped<ITemperatureService, TemperatureService>();
+builder.Services.AddScoped<IInfrastructureService, InfrastructureService>();
 
 // Repo's
 builder.Services.AddScoped<ITemperatureRepo, TemperatureRepo>();
+builder.Services.AddScoped<IInfrastructureRepo, InfrastructureRepo>();
 
 // Background Services
 builder.Services.AddHostedService<SerialReaderService>(); // USB
@@ -43,7 +45,8 @@ if (app.Environment.IsDevelopment())
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<DashBoardContext>();
-    dbContext.Database.EnsureCreated();
+    //dbContext.Database.EnsureCreated();
+    dbContext.Database.Migrate();
 }
 
 app.UseAuthorization();
