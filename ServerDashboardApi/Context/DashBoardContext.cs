@@ -9,5 +9,7 @@ namespace ServerDashboardApi.Context
 
         public DbSet<Temperture> Tempertures { get; set; }
         public DbSet<Event> Events { get; set; }
+        public DbSet<ProxmoxNode> ProxmoxNodes { get; set; }
+        public DbSet<VirtualMachine> VirtualMachines { get; set; }
     }
 }
