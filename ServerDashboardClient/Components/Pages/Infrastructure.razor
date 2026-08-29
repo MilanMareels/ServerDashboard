@@ -16,59 +16,69 @@
     }
     else
     {
-        @foreach (var node in nodes)
+        @if (!nodes.Any())
         {
-            <div class="card shadow border-0 rounded-4 mb-5 p-4">
-                <h2 class="text-primary border-bottom pb-2">@node.Name</h2>
+            <div class="alert alert-info shadow-sm rounded-4 p-4 mb-4">
+                <h4 class="alert-heading fw-bold">Geen nodes gevonden!</h4>
+                <p class="mb-0">Er zijn momenteel nog geen Proxmox nodes geregistreerd in het systeem. Voeg hieronder je eerste node toe om te beginnen.</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var node in nodes)
+            {
+                <div class="card shadow border-0 rounded-4 mb-5 p-4">
+                    <h2 class="text-primary border-bottom pb-2">@node.Name</h2>
 
-                <div class="bg-primary bg-opacity-10 border-start border-5 border-primary p-3 my-3 rounded-end">
-                    <strong>Hardware Capaciteit:</strong>
-                    <span class="badge bg-purple ms-2" style="background-color: #8e44ad;">@node.RamGb GB RAM</span>
-                    <span class="badge bg-info">@node.Cores Cores</span>
-                    <span class="badge bg-success">@node.StorageGb GB Opslag</span>
-                </div>
+                    <div class="bg-primary bg-opacity-10 border-start border-5 border-primary p-3 my-3 rounded-end">
+                        <strong>Hardware Capaciteit:</strong>
+                        <span class="badge bg-purple ms-2" style="background-color: #8e44ad;">@node.RamGb GB RAM</span>
+                        <span class="badge bg-info">@node.Cores Cores</span>
+                        <span class="badge bg-success">@node.StorageGb GB Opslag</span>
+                    </div>
 
-                <h3 class="text-secondary mt-4">💻 Virtuele Machines</h3>
-                <div class="table-responsive">
-                    <table class="table table-hover table-bordered">
-                        <thead class="table-light">
-                            <tr>
-                                <th>VM Naam</th>
-                                <th>RAM (GB)</th>
-                                <th>Cores</th>
-                                <th>Opslag (GB)</th>
-                                <th>Opmerkingen</th>
-                                <th>Acties</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (node.VirtualMachines.Any())
-                            {
-                                @foreach (var vm in node.VirtualMachines)
+                    <h3 class="text-secondary mt-4">💻 Virtuele Machines</h3>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>VM Naam</th>
+                                    <th>RAM (GB)</th>
+                                    <th>Cores</th>
+                                    <th>Opslag (GB)</th>
+                                    <th>Opmerkingen</th>
+                                    <th>Acties</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (node.VirtualMachines.Any())
+                                {
+                                    @foreach (var vm in node.VirtualMachines)
+                                    {
+                                        <tr>
+                                            <td><strong>@vm.Name</strong></td>
+                                            <td>@vm.RamGb GB</td>
+                                            <td>@vm.Cores</td>
+                                            <td>@vm.StorageGb GB</td>
+                                            <td>@vm.Notes</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-warning" @onclick="() => EditVm(vm)">Bewerk</button>
+                                                <button class="btn btn-sm btn-danger" @onclick="() => DeleteVm(vm.Id)">X</button>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
                                 {
                                     <tr>
-                                        <td><strong>@vm.Name</strong></td>
-                                        <td>@vm.RamGb GB</td>
-                                        <td>@vm.Cores</td>
-                                        <td>@vm.StorageGb GB</td>
-                                        <td>@vm.Notes</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-warning" @onclick="() => EditVm(vm)">Bewerk</button>
-                                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteVm(vm.Id)">X</button>
-                                        </td>
+                                        <td colspan="6" class="text-center text-muted">Geen virtuele machines gevonden op deze node.</td>
                                     </tr>
                                 }
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td colspan="6" class="text-center text-muted">Geen virtuele machines gevonden op deze node.</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
+            }
         }
 
         <!-- Formulier om een nieuwe NODE toe te voegen -->
@@ -97,58 +107,60 @@
             </EditForm>
         </div>
 
-        <!-- Formulier om een VM toe te voegen of te updaten -->
-        <div class="card shadow border-0 rounded-4 p-4 mt-4">
-            <h3 class="text-secondary fw-bold mb-3">@(isEditing ? "VM Bewerken" : "Nieuwe VM Toevoegen")</h3>
-            <EditForm Model="currentVm" OnValidSubmit="SaveVm">
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <label class="fw-semibold">VM Naam</label>
-                        <InputText @bind-Value="currentVm.Name" class="form-control" />
+        <!-- Formulier om een VM toe te voegen of te updaten (Alleen zinvol als er nodes zijn) -->
+        @if (nodes.Any())
+        {
+            <div class="card shadow border-0 rounded-4 p-4 mt-4">
+                <h3 class="text-secondary fw-bold mb-3">@(isEditing ? "VM Bewerken" : "Nieuwe VM Toevoegen")</h3>
+                <EditForm Model="currentVm" OnValidSubmit="SaveVm">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="fw-semibold">VM Naam</label>
+                            <InputText @bind-Value="currentVm.Name" class="form-control" />
+                        </div>
+                        <div class="col-md-2">
+                            <label class="fw-semibold">RAM (GB)</label>
+                            <InputNumber @bind-Value="currentVm.RamGb" class="form-control" />
+                        </div>
+                        <div class="col-md-2">
+                            <label class="fw-semibold">Cores</label>
+                            <InputNumber @bind-Value="currentVm.Cores" class="form-control" />
+                        </div>
+                        <div class="col-md-2">
+                            <label class="fw-semibold">Opslag (GB)</label>
+                            <InputNumber @bind-Value="currentVm.StorageGb" class="form-control" />
+                        </div>
+                        <div class="col-md-2">
+                            <label class="fw-semibold">Kies Node</label>
+                            <InputSelect @bind-Value="currentVm.ProxmoxNodeId" class="form-select">
+                                <option value="0">Selecteer...</option>
+                                @foreach (var n in nodes)
+                                {
+                                    <option value="@n.Id">@n.Name</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="fw-semibold">Opmerkingen</label>
+                            <InputText @bind-Value="currentVm.Notes" class="form-control" />
+                        </div>
                     </div>
-                    <div class="col-md-2">
-                        <label class="fw-semibold">RAM (GB)</label>
-                        <InputNumber @bind-Value="currentVm.RamGb" class="form-control" />
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-success px-4 shadow-sm">VM Opslaan</button>
+                        @if (isEditing)
+                        {
+                            <button type="button" class="btn btn-secondary px-4 shadow-sm ms-2" @onclick="ResetForm">Annuleren</button>
+                        }
                     </div>
-                    <div class="col-md-2">
-                        <label class="fw-semibold">Cores</label>
-                        <InputNumber @bind-Value="currentVm.Cores" class="form-control" />
-                    </div>
-                    <div class="col-md-2">
-                        <label class="fw-semibold">Opslag (GB)</label>
-                        <InputNumber @bind-Value="currentVm.StorageGb" class="form-control" />
-                    </div>
-                    <div class="col-md-2">
-                        <label class="fw-semibold">Kies Node</label>
-                        <InputSelect @bind-Value="currentVm.ProxmoxNodeId" class="form-select">
-                            <option value="0">Selecteer...</option>
-                            @foreach (var n in nodes)
-                            {
-                                <option value="@n.Id">@n.Name</option>
-                            }
-                        </InputSelect>
-                    </div>
-                    <div class="col-md-12">
-                        <label class="fw-semibold">Opmerkingen</label>
-                        <InputText @bind-Value="currentVm.Notes" class="form-control" />
-                    </div>
-                </div>
-                <div class="mt-3">
-                    <button type="submit" class="btn btn-success px-4 shadow-sm">VM Opslaan</button>
-                    @if (isEditing)
-                    {
-                        <button type="button" class="btn btn-secondary px-4 shadow-sm ms-2" @onclick="ResetForm">Annuleren</button>
-                    }
-                </div>
-            </EditForm>
-        </div>
+                </EditForm>
+            </div>
+        }
     }
 </div>
 
 @code {
     private List<ProxmoxNodeDTO>? nodes;
 
-    // Variabelen voor de formulieren
     private VirtualMachineDTO currentVm = new();
     private ProxmoxNodeDTO currentNode = new();
     private bool isEditing = false;
@@ -163,22 +175,18 @@
         nodes = await _infraClient.GetNodesWithVMsAsync();
     }
 
-    // --- NODE LOGICA ---
     private async Task SaveNode()
     {
-        // Validatie: check of er een naam is ingevuld
         if (string.IsNullOrWhiteSpace(currentNode.Name)) return;
 
         await _infraClient.AddNodeAsync(currentNode);
-        currentNode = new ProxmoxNodeDTO(); // Maak node-formulier leeg
-        await LoadData(); // Ververs de lijst
+        currentNode = new ProxmoxNodeDTO();
+        await LoadData();
     }
 
-    // --- VM LOGICA ---
     private async Task SaveVm()
     {
-        if (currentVm.ProxmoxNodeId == 0) return; // Validatie check: Er moet een node gekozen zijn
-
+        if (currentVm.ProxmoxNodeId == 0) return;
         if (isEditing)
         {
             await _infraClient.UpdateVirtualMachineAsync(currentVm);
@@ -189,12 +197,11 @@
         }
 
         ResetForm();
-        await LoadData(); // Ververs de lijst
+        await LoadData();
     }
 
     private void EditVm(VirtualMachineDTO vm)
     {
-        // Kopieer data naar het formulier
         currentVm = new VirtualMachineDTO
         {
             Id = vm.Id,
