@@ -48,15 +48,15 @@
                     <div class="d-flex flex-column gap-3">
                         <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-3 border fs-5">
                             <span class="fw-semibold text-dark">Top Fans</span>
-                            <span class="badge rounded-pill @(dashBoard.BackFans == "ON" ? "bg-success" : "bg-danger") px-4 py-2 shadow-sm">
-                                @dashBoard.BackFans
+                            <span class="badge rounded-pill @(dashBoard.TopFans == "ON" ? "bg-success" : "bg-danger") px-4 py-2 shadow-sm">
+                                @dashBoard.TopFans
                             </span>
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-3 border fs-5">
                             <span class="fw-semibold text-dark">Bottom Fans</span>
-                            <span class="badge rounded-pill @(dashBoard.TopAndBottomFans == "ON" ? "bg-success" : "bg-danger") px-4 py-2 shadow-sm">
-                                @dashBoard.TopAndBottomFans
+                            <span class="badge rounded-pill @(dashBoard.BottomFans == "ON" ? "bg-success" : "bg-danger") px-4 py-2 shadow-sm">
+                                @dashBoard.BottomFans
                             </span>
                         </div>
                     </div>

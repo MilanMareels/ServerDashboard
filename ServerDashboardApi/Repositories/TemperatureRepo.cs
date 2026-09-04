@@ -20,8 +20,8 @@ namespace ServerDashboardApi.Repositories
                     Temp = 0,
                     MaxTemp = 0,
                     MinTemp = 0,
-                    BackFans = "OFF",
-                    TopAndBottomFans = "OFF"
+                    TopFans = "OFF",
+                    BottomFans = "OFF"
                 };
             }
 
@@ -30,8 +30,8 @@ namespace ServerDashboardApi.Repositories
                 Temp = data.Temp,
                 MaxTemp = data.MaxTemp,
                 MinTemp = data.MinTemp,
-                BackFans = data.BackFans,
-                TopAndBottomFans = data.TopAndBottomFans,
+                TopFans = data.TopFans,
+                BottomFans = data.BottomFans,
             };
         }
 

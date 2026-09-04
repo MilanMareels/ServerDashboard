@@ -50,15 +50,15 @@ namespace ServerDashboardApi.Services
                     Temp = temp,
                     MinTemp = minTemp,
                     MaxTemp = maxTemp,
-                    BackFans = $"{(temp > 25 ? "ON" : "OFF")}",
-                    TopAndBottomFans = $"{(temp > 30 ? "ON" : "OFF")}"
+                    TopFans = $"{(temp > 25 ? "ON" : "OFF")}",
+                    BottomFans = $"{(temp > 30 ? "ON" : "OFF")}"
                 };
 
                 var microBit = new MicroBit // Object to db
                 {
                     Temp = temp,
-                    BackFans = metrics.BackFans,
-                    TopAndBottomFans = metrics.TopAndBottomFans,
+                    TopFans = metrics.TopFans,
+                    BottomFans = metrics.BottomFans,
                 };
 
                 _cacheService.SetTemperatureCache(metrics); // Caching
@@ -104,8 +104,8 @@ namespace ServerDashboardApi.Services
                             Temp = data.Temp,
                             MinTemp = minTemp,
                             MaxTemp = maxTemp,
-                            BackFans = data.BackFans,
-                            TopAndBottomFans = data.TopAndBottomFans
+                            TopFans = data.TopFans,
+                            BottomFans = data.BottomFans
                         };
 
                         _logger.LogInformation($"New temperature read: {data.Temp}°C");
@@ -133,7 +133,7 @@ namespace ServerDashboardApi.Services
                 using var scope = _scopeFactory.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<DashBoardContext>();
 
-                db.Tempertures.Add(new Temperture { Date = DateTime.UtcNow, Temp = microBit.Temp, BackFans = microBit.BackFans, TopAndBottomFans = microBit.TopAndBottomFans });
+                db.Tempertures.Add(new Temperture { Date = DateTime.UtcNow, Temp = microBit.Temp, TopFans = microBit.TopFans, BottomFans = microBit.BottomFans });
 
                 if (isEvent)
                 {
