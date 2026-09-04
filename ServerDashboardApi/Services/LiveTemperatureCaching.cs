@@ -11,7 +11,7 @@ namespace ServerDashboardApi.Services
         {
             _memoryCache.Set(_key, metrics, new MemoryCacheEntryOptions
             {
-                SlidingExpiration = TimeSpan.FromMinutes(1)
+                SlidingExpiration = TimeSpan.FromMinutes(2)
             });
 
             _logger.LogInformation($"Cache updated with new temperature: {metrics.Temp}°C");
