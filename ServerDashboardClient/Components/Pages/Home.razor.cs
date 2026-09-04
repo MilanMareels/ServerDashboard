@@ -26,7 +26,7 @@ namespace ServerDashboardClient.Components.Pages
         // Refresh every 1 sec, get api data every 1 sec.
         private async Task StartAutoRefreshAsync()
         {
-            _timer = new PeriodicTimer(TimeSpan.FromSeconds(30000));
+            _timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
 
             try
             {
