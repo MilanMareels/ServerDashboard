@@ -8,7 +8,6 @@ namespace ServerDashboardClient.Components.Pages
     {
         [Inject]
         public ITemperatureService _temperatureService { get; set; }
-
         public DashBoardDTO? dashBoard { get; set; }
         public IEnumerable<EventDTO>? serverEvents { get; set; }
 

@@ -2,7 +2,7 @@
 
 namespace ServerDashboardClient.Services
 {
-    public class InfrastructureClientService(HttpClient _httpClient) : IInfrastructureClientService
+    public class InfrastructureService(HttpClient _httpClient) : IInfrastructureService
     {
         public async Task<List<ProxmoxNodeDTO>?> GetNodesWithVMsAsync()
         {

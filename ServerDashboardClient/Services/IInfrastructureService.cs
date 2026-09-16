@@ -2,7 +2,7 @@
 
 namespace ServerDashboardClient.Services
 {
-    public interface IInfrastructureClientService
+    public interface IInfrastructureService
     {
         Task<List<ProxmoxNodeDTO>?> GetNodesWithVMsAsync();
         Task AddVirtualMachineAsync(VirtualMachineDTO vmDto);

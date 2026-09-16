@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents(); // Server Side rendering!
 
-builder.Services.AddHttpClient<IInfrastructureClientService, InfrastructureClientService>(client =>
+builder.Services.AddHttpClient<IInfrastructureService, InfrastructureService>(client =>
 {
     var apiUrl = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5120/api/";
     client.BaseAddress = new Uri(apiUrl);

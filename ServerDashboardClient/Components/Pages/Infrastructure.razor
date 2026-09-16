@@ -1,9 +1,6 @@
 ﻿@page "/infrastructure"
 @rendermode InteractiveServer
 
-@using ServerDashboardClient.Services
-@inject IInfrastructureClientService _infraClient
-
 <PageTitle>Server Infrastructuur</PageTitle>
 
 <div class="container-fluid bg-light p-3 p-md-5">
@@ -30,10 +27,40 @@
                     <h2 class="text-primary border-bottom pb-2">@node.Name</h2>
 
                     <div class="bg-primary bg-opacity-10 border-start border-5 border-primary p-3 my-3 rounded-end">
-                        <strong>Hardware Capacity:</strong>
-                        <span class="badge bg-purple ms-2" style="background-color: #8e44ad;">@node.RamGb GB RAM</span>
-                        <span class="badge bg-info">@node.Cores Cores</span>
-                        <span class="badge bg-success">@node.StorageGb GB Storage</span>
+                        <div class="mb-2">
+                            <strong>Hardware Capacity:</strong>
+                            <span class="badge bg-purple ms-2" style="background-color: #8e44ad;">@node.RamGb GB RAM</span>
+                            <span class="badge bg-info">@node.Cores Cores</span>
+                            <span class="badge bg-success">@node.StorageGb GB Storage</span>
+                        </div>
+ 
+                        <div>
+                            <strong>Total Hardware Usage:</strong>
+                            @if (@GetUsage(node.Id).RamGb <= @node.RamGb)
+                            {
+                                <span class="badge bg-purple ms-2" style="background-color: #8e44ad;">@GetUsage(node.Id).RamGb GB RAM</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger ms-2">@GetUsage(node.Id).RamGb GB RAM</span>
+                            }
+                            @if (@GetUsage(node.Id).Cores <= @node.Cores)
+                            {
+                                <span class="badge bg-info ms-1">@GetUsage(node.Id).Cores Cores</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger ms-1">@GetUsage(node.Id).Cores Cores</span>
+                            }
+                            @if (@GetUsage(node.Id).StorageGb < node.StorageGb)
+                            {
+                                <span class="badge bg-success ms-1">@GetUsage(node.Id).StorageGb GB Storage</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger ms-1">@GetUsage(node.Id).StorageGb GB Storage</span>
+                            }
+                        </div>
                     </div>
 
                     <h3 class="text-secondary mt-4">Virtual Machines</h3>
@@ -79,31 +106,6 @@
                 </div>
             }
         }
-
-        <div class="card shadow border-0 rounded-4 p-4 mt-4 bg-primary bg-opacity-10">
-            <h3 class="text-primary text-uppercase fw-bold mb-3">Add New Node</h3>
-            <EditForm Model="currentNode" OnValidSubmit="SaveNode">
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <label class="fw-semibold">Node Name</label>
-                        <InputText @bind-Value="currentNode.Name" class="form-control" placeholder="E.g., PVE3" />
-                    </div>
-                    <div class="col-md-3">
-                        <label class="fw-semibold">RAM (GB)</label>
-                        <InputNumber @bind-Value="currentNode.RamGb" class="form-control" />
-                    </div>
-                    <div class="col-md-3">
-                        <label class="fw-semibold">Cores</label>
-                        <InputNumber @bind-Value="currentNode.Cores" class="form-control" />
-                    </div>
-                    <div class="col-md-3">
-                        <label class="fw-semibold">Storage (GB)</label>
-                        <InputNumber @bind-Value="currentNode.StorageGb" class="form-control" />
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary mt-3 px-4 shadow-sm">Save Node</button>
-            </EditForm>
-        </div>
 
         @if (nodes.Any())
         {
@@ -152,5 +154,30 @@
                 </EditForm>
             </div>
         }
+
+        <div class="card shadow border-0 rounded-4 p-4 mt-4 bg-primary bg-opacity-10">
+            <h3 class="text-primary text-uppercase fw-bold mb-3">Add New Node</h3>
+            <EditForm Model="currentNode" OnValidSubmit="SaveNode">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="fw-semibold">Node Name</label>
+                        <InputText @bind-Value="currentNode.Name" class="form-control" placeholder="E.g., PVE3" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="fw-semibold">RAM (GB)</label>
+                        <InputNumber @bind-Value="currentNode.RamGb" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="fw-semibold">Cores</label>
+                        <InputNumber @bind-Value="currentNode.Cores" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="fw-semibold">Storage (GB)</label>
+                        <InputNumber @bind-Value="currentNode.StorageGb" class="form-control" />
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3 px-4 shadow-sm">Save Node</button>
+            </EditForm>
+        </div>
     }
 </div>

@@ -1,11 +1,15 @@
+using Microsoft.AspNetCore.Components;
 using ServerDashboardApi.DTOs;
+using ServerDashboardClient.Components.Models;
+using ServerDashboardClient.Services;
 
 namespace ServerDashboardClient.Components.Pages
 {
     public partial class Infrastructure
     {
+        [Inject]
+        public IInfrastructureService _infrastructureService { get; set; }
         private List<ProxmoxNodeDTO>? nodes;
-
         private VirtualMachineDTO currentVm = new();
         private ProxmoxNodeDTO currentNode = new();
         private bool isEditing = false;
@@ -17,14 +21,14 @@ namespace ServerDashboardClient.Components.Pages
 
         private async Task LoadData()
         {
-            nodes = await _infraClient.GetNodesWithVMsAsync();
+            nodes = await _infrastructureService.GetNodesWithVMsAsync();
         }
 
         private async Task SaveNode()
         {
             if (string.IsNullOrWhiteSpace(currentNode.Name)) return;
 
-            await _infraClient.AddNodeAsync(currentNode);
+            await _infrastructureService.AddNodeAsync(currentNode);
             currentNode = new ProxmoxNodeDTO();
             await LoadData();
         }
@@ -34,11 +38,11 @@ namespace ServerDashboardClient.Components.Pages
             if (currentVm.ProxmoxNodeId == 0) return;
             if (isEditing)
             {
-                await _infraClient.UpdateVirtualMachineAsync(currentVm);
+                await _infrastructureService.UpdateVirtualMachineAsync(currentVm);
             }
             else
             {
-                await _infraClient.AddVirtualMachineAsync(currentVm);
+                await _infrastructureService.AddVirtualMachineAsync(currentVm);
             }
 
             ResetForm();
@@ -62,8 +66,24 @@ namespace ServerDashboardClient.Components.Pages
 
         private async Task DeleteVm(int id)
         {
-            await _infraClient.DeleteVirtualMachineAsync(id);
+            await _infrastructureService.DeleteVirtualMachineAsync(id);
             await LoadData();
+        }
+
+        private Usage GetUsage(int id)
+        {
+            var node = nodes.FirstOrDefault(n => n.Id == id).VirtualMachines;
+
+            var ram = node.Sum(vm => vm.RamGb);
+            var cores = node.Sum(vm => vm.Cores);
+            var storage = node.Sum(vm => vm.StorageGb);
+
+            return new Usage
+            {
+                RamGb = ram,
+                Cores = cores,
+                StorageGb = storage
+            };
         }
 
         private void ResetForm()
