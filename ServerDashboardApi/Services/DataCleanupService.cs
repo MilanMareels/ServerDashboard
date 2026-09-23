@@ -1,20 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ServerDashboardApi.Context;
-using System.Net.WebSockets;
 
 namespace ServerDashboardApi.Services
 {
-    public class DataCleanupService : BackgroundService
+    public class DataCleanupService(IServiceScopeFactory _scopeFactory, ILogger<DataCleanupService> _logger) : BackgroundService
     {
-        private readonly IServiceScopeFactory _scopeFactory;
-        private readonly ILogger<DataCleanupService> _logger;
-
-        public DataCleanupService(IServiceScopeFactory scopeFactory, ILogger<DataCleanupService> logger)
-        {
-            _scopeFactory = scopeFactory;
-            _logger = logger;
-        }
-
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _logger.LogInformation("DataCleanupService has started in the background.");
