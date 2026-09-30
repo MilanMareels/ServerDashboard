@@ -1,18 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ServerDashboardApi.Context;
-using ServerDashboardApi.DTOs;
+﻿using ServerDashboardApi.DTOs;
 using ServerDashboardApi.Models;
 using ServerDashboardApi.Repositories;
 
 namespace ServerDashboardApi.Services
 {
-    public class InfrastructureService(IInfrastructureRepo _repo) : IInfrastructureService
+    public class InfrastructureService(IInfrastructureRepo _repo, ILogger<InfrastructureService> _logger) : IInfrastructureService
     {
         public async Task<List<ProxmoxNodeDTO>> GetNodesWithVMsAsync()
         {
             var nodes = await _repo.GetNodesWithVMsAsync();
 
-            // Map Models naar DTOs
+            _logger.LogInformation($"Returning nodes {nodes.Count}");
+
             return nodes.Select(n => new ProxmoxNodeDTO
             {
                 Id = n.Id,
@@ -31,6 +30,8 @@ namespace ServerDashboardApi.Services
                     ProxmoxNodeId = vm.ProxmoxNodeId
                 }).ToList()
             }).ToList();
+
+           
         }
 
         public async Task AddVirtualMachineAsync(VirtualMachineDTO vmDto)
