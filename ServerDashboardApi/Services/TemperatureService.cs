@@ -1,5 +1,4 @@
 ﻿using ServerDashboardApi.DTOs;
-using ServerDashboardApi.Models;
 using ServerDashboardApi.Repositories;
 
 namespace ServerDashboardApi.Services
@@ -16,9 +15,9 @@ namespace ServerDashboardApi.Services
             return await _temperatureRepo.GetEvents();
         }
 
-        public Task GetHistory()
+        public async Task<IEnumerable<TempertureDTO>> GetHistory()
         {
-            throw new NotImplementedException();
+            return await _temperatureRepo.GetHistory();
         }
     }
 }

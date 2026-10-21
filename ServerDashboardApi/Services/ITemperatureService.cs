@@ -7,6 +7,6 @@ namespace ServerDashboardApi.Services
     {
         DashBoardDTO GetFullDashBoard();
         Task<IEnumerable<EventDTO>> GetEvents();
-        Task GetHistory();
+        Task<IEnumerable<TempertureDTO>> GetHistory();
     }
 }
