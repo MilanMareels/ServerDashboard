@@ -1,82 +1,173 @@
-﻿@page "/"
+@page "/"
 @rendermode InteractiveServer
 
 <PageTitle>Server Dashboard</PageTitle>
 
-<div class="container-fluid min-vh-100 bg-light p-3 p-md-5 d-flex flex-column">
-
-    <header class="mb-4">
-        <h1 class="display-5 fw-bold text-dark text-uppercase tracking-wider">Server Status</h1>
-        <p class="text-muted lead">Real-time Overview</p>
+<div class="dash-page">
+    <header class="dash-header">
+        <div>
+            <div class="dash-eyebrow">
+                <span class="dash-dot dash-dot--pulse"></span>
+                Live monitoring
+            </div>
+            <h1 class="dash-title">Server Status</h1>
+            <p class="dash-subtitle">Real-time overview of temperature, cooling and events</p>
+        </div>
+        <span class="dash-chip">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                <path d="M8 3.5a.5.5 0 0 0-1 0V8a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 7.71V3.5z"/>
+            </svg>
+            Auto-refresh every 2 minutes
+        </span>
     </header>
 
     @if (dashBoard != null)
     {
-        <div class="row g-4 flex-grow-0 mb-4">
+        <div class="row g-4">
+            <div class="col-12 col-xl-5">
+                <div class="dash-card d-flex flex-column">
+                    <div class="dash-card__header">
+                        <span class="dash-card__icon dash-card__icon--temp">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M9.5 12.5a1.5 1.5 0 1 1-2-1.415V2.5a.5.5 0 0 1 1 0v8.585a1.5 1.5 0 0 1 1 1.415Z"/>
+                                <path d="M5.5 2.5a2.5 2.5 0 0 1 5 0v7.55a3.5 3.5 0 1 1-5 0V2.5ZM8 1a2 2 0 0 0-1 0v2h2V1Z"/>
+                            </svg>
+                        </span>
+                        <span class="dash-card__label">Current Temperature</span>
+                    </div>
 
-            <div class="col-12 col-lg-6 d-flex">
-                <div class="card shadow border-0 rounded-4 w-100 p-4 d-flex flex-column justify-content-center align-items-center text-center">
-                    <h3 class="text-muted text-uppercase fw-bold mb-4">Current Temperature</h3>
+                    <div class="dash-temp">
+                        <span class="dash-temp__value @TempValueClass">@dashBoard.Temp</span>
+                        <span class="dash-temp__unit">&deg;C</span>
+                    </div>
 
-                    <div class="fw-bolder lh-1 @(dashBoard.Temp >= 25 ? "text-danger" : "text-primary")" style="font-size: clamp(6rem, 15vw, 12rem);">
-                        @dashBoard.Temp&deg;C
+                    <span class="dash-pill @TempPillClass align-self-start">
+                        <span class="dash-dot @(IsHighTemp ? "dash-dot--off" : "")"></span>
+                        @TempStatus
+                    </span>
+
+                    <div class="dash-range mt-auto">
+                        <div class="dash-range__labels">
+                            <span>@dashBoard.MinTemp&deg;C min</span>
+                            <span>@dashBoard.MaxTemp&deg;C max</span>
+                        </div>
+                        <div class="dash-range__track">
+                            <div class="dash-range__fill" style="width: @TempPercent%"></div>
+                            <div class="dash-range__thumb" style="left: @TempPercent%"></div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-12 col-lg-6 d-flex flex-column gap-4">
-
-                <div class="row g-4 flex-grow-1">
-                    <div class="col-6 d-flex">
-                        <div class="card shadow border-0 rounded-4 w-100 p-4 text-center d-flex flex-column justify-content-center">
-                            <span class="text-muted text-uppercase fw-bold mb-2">Minimum</span>
-                            <span class="display-5 fw-bold text-dark">@dashBoard.MinTemp&deg;C</span>
+            <div class="col-12 col-xl-7">
+                <div class="row g-4 h-100">
+                    <div class="col-6">
+                        <div class="dash-card d-flex flex-column">
+                            <div class="dash-card__header">
+                                <span class="dash-card__icon dash-card__icon--green">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                                        <path d="M9.5 12.5a1.5 1.5 0 1 1-2-1.415V2.5a.5.5 0 0 1 1 0v8.585a1.5 1.5 0 0 1 1 1.415Z"/>
+                                        <path d="M5.5 2.5a2.5 2.5 0 0 1 5 0v7.55a3.5 3.5 0 1 1-5 0V2.5ZM8 1a2 2 0 0 0-1 0v2h2V1Z"/>
+                                    </svg>
+                                </span>
+                                <span class="dash-card__label">Minimum</span>
+                            </div>
+                            <div class="dash-stat mt-auto">
+                                <span class="dash-stat__value">@dashBoard.MinTemp<span class="dash-stat__unit">&deg;C</span></span>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="col-6 d-flex">
-                        <div class="card shadow border-0 rounded-4 w-100 p-4 text-center d-flex flex-column justify-content-center">
-                            <span class="text-muted text-uppercase fw-bold mb-2">Maximum</span>
-                            <span class="display-5 fw-bold text-dark">@dashBoard.MaxTemp&deg;C</span>
+                    <div class="col-6">
+                        <div class="dash-card d-flex flex-column">
+                            <div class="dash-card__header">
+                                <span class="dash-card__icon dash-card__icon--temp">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                                        <path d="M9.5 12.5a1.5 1.5 0 1 1-2-1.415V2.5a.5.5 0 0 1 1 0v8.585a1.5 1.5 0 0 1 1 1.415Z"/>
+                                        <path d="M5.5 2.5a2.5 2.5 0 0 1 5 0v7.55a3.5 3.5 0 1 1-5 0V2.5ZM8 1a2 2 0 0 0-1 0v2h2V1Z"/>
+                                    </svg>
+                                </span>
+                                <span class="dash-card__label">Maximum</span>
+                            </div>
+                            <div class="dash-stat mt-auto">
+                                <span class="dash-stat__value">@dashBoard.MaxTemp<span class="dash-stat__unit">&deg;C</span></span>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="card shadow border-0 rounded-4 w-100 p-4 flex-grow-1 d-flex flex-column justify-content-center">
-                    <h4 class="text-muted text-uppercase fw-bold border-bottom pb-3 mb-4">Cooling Fans</h4>
+                    <div class="col-12">
+                        <div class="dash-card">
+                            <div class="dash-card__header">
+                                <span class="dash-card__icon dash-card__icon--sky">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                                        <path d="M12.5 2A2.5 2.5 0 0 0 10 4.5a.5.5 0 0 1-1 0A3.5 3.5 0 1 1 12.5 8H.5a.5.5 0 0 1 0-1h12a2.5 2.5 0 0 0 0-5zm-7 1a1 1 0 0 0-1 1 .5.5 0 0 1-1 0 2 2 0 1 1 2 2h-5a.5.5 0 0 1 0-1h5a1 1 0 0 0 0-2zM0 9.5A.5.5 0 0 1 .5 9h10.042a3 3 0 1 1-3 3 .5.5 0 0 1 1 0 2 2 0 1 0 2-2H.5a.5.5 0 0 1-.5-.5z"/>
+                                    </svg>
+                                </span>
+                                <span class="dash-card__label">Cooling Fans</span>
+                            </div>
 
-                    <div class="d-flex flex-column gap-3">
-                        <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-3 border fs-5">
-                            <span class="fw-semibold text-dark">Top Fans</span>
-                            <span class="badge rounded-pill @(dashBoard.TopFans == "ON" ? "bg-success" : "bg-danger") px-4 py-2 shadow-sm">
-                                @dashBoard.TopFans
-                            </span>
-                        </div>
+                            <div class="dash-fan-row">
+                                <span class="dash-fan-row__name">
+                                    <span class="dash-fan-row__icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                                            <path d="M12.5 2A2.5 2.5 0 0 0 10 4.5a.5.5 0 0 1-1 0A3.5 3.5 0 1 1 12.5 8H.5a.5.5 0 0 1 0-1h12a2.5 2.5 0 0 0 0-5zm-7 1a1 1 0 0 0-1 1 .5.5 0 0 1-1 0 2 2 0 1 1 2 2h-5a.5.5 0 0 1 0-1h5a1 1 0 0 0 0-2zM0 9.5A.5.5 0 0 1 .5 9h10.042a3 3 0 1 1-3 3 .5.5 0 0 1 1 0 2 2 0 1 0 2-2H.5a.5.5 0 0 1-.5-.5z"/>
+                                        </svg>
+                                    </span>
+                                    Top Fans
+                                </span>
+                                <span class="dash-state @(dashBoard.TopFans == "ON" ? "dash-state--on" : "dash-state--off")">
+                                    <span class="dash-dot @(dashBoard.TopFans == "ON" ? "" : "dash-dot--off")"></span>
+                                    @dashBoard.TopFans
+                                </span>
+                            </div>
 
-                        <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded-3 border fs-5">
-                            <span class="fw-semibold text-dark">Bottom Fans</span>
-                            <span class="badge rounded-pill @(dashBoard.BottomFans == "ON" ? "bg-success" : "bg-danger") px-4 py-2 shadow-sm">
-                                @dashBoard.BottomFans
-                            </span>
+                            <div class="dash-fan-row">
+                                <span class="dash-fan-row__name">
+                                    <span class="dash-fan-row__icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                                            <path d="M12.5 2A2.5 2.5 0 0 0 10 4.5a.5.5 0 0 1-1 0A3.5 3.5 0 1 1 12.5 8H.5a.5.5 0 0 1 0-1h12a2.5 2.5 0 0 0 0-5zm-7 1a1 1 0 0 0-1 1 .5.5 0 0 1-1 0 2 2 0 1 1 2 2h-5a.5.5 0 0 1 0-1h5a1 1 0 0 0 0-2zM0 9.5A.5.5 0 0 1 .5 9h10.042a3 3 0 1 1-3 3 .5.5 0 0 1 1 0 2 2 0 1 0 2-2H.5a.5.5 0 0 1-.5-.5z"/>
+                                        </svg>
+                                    </span>
+                                    Bottom Fans
+                                </span>
+                                <span class="dash-state @(dashBoard.BottomFans == "ON" ? "dash-state--on" : "dash-state--off")">
+                                    <span class="dash-dot @(dashBoard.BottomFans == "ON" ? "" : "dash-dot--off")"></span>
+                                    @dashBoard.BottomFans
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="row flex-grow-1">
-            <div class="col-12 d-flex flex-column">
-                <div class="card shadow border-0 rounded-4 w-100 p-4 flex-grow-1">
-                    <h4 class="text-muted text-uppercase fw-bold border-bottom pb-3 mb-3">Event Log</h4>
+        <div class="row g-4 mt-0">
+            <div class="col-12">
+                <div class="dash-card">
+                    <div class="dash-card__title">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="dash-card__icon dash-card__icon--amber" style="width:2rem;height:2rem;">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style="width:1rem;height:1rem;">
+                                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+                                </svg>
+                            </span>
+                            <h3 class="fw-bold mb-0" style="font-size:1.05rem;">Event Log</h3>
+                        </div>
+                        @if (serverEvents != null)
+                        {
+                            <span class="dash-chip">@serverEvents.Count() events</span>
+                        }
+                    </div>
 
-                    <div class="overflow-auto rounded border flex-grow-1" style="max-height: 400px;">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light position-sticky top-0 z-1" style="box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);">
+                    <div class="dash-table-wrap overflow-auto" style="max-height: 420px;">
+                        <table class="dash-table align-middle">
+                            <thead>
                                 <tr>
-                                    <th scope="col" class="ps-3 py-3">Timestamp</th>
-                                    <th scope="col" class="py-3">Severity</th>
-                                    <th scope="col" class="py-3">Temperature</th>
-                                    <th scope="col" class="py-3">Event Info</th>
+                                    <th>Timestamp</th>
+                                    <th>Severity</th>
+                                    <th>Temperature</th>
+                                    <th>Event Info</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -85,9 +176,10 @@
                                     @foreach (var ev in serverEvents)
                                     {
                                         <tr>
-                                            <td class="text-muted ps-3 fw-medium">@ev.Date.AddHours(2).ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                            <td class="text-muted fw-medium" style="white-space:nowrap;">@ev.Date.AddHours(2).ToString("yyyy-MM-dd HH:mm:ss")</td>
                                             <td>
-                                                <span class="badge rounded-pill @(ev.Severity == "Critical" ? "bg-danger text-white" : "bg-warning") px-3 py-2">
+                                                <span class="dash-badge @(ev.Severity == "Critical" ? "dash-badge--danger" : "dash-badge--warning")">
+                                                    <span class="dash-dot @(ev.Severity == "Critical" ? "dash-dot--off" : "dash-dot--warning")" style="width:6px;height:6px;"></span>
                                                     @ev.Severity
                                                 </span>
                                             </td>
@@ -99,7 +191,7 @@
                                 else
                                 {
                                     <tr>
-                                        <td colspan="4" class="text-center text-muted py-4">No events found.</td>
+                                        <td colspan="4" class="text-center text-muted py-5">No events found.</td>
                                     </tr>
                                 }
                             </tbody>
@@ -111,10 +203,11 @@
     }
     else
     {
-        <div class="d-flex flex-column flex-grow-1 justify-content-center align-items-center text-muted">
-            <div class="spinner-border text-primary mb-4" style="width: 5rem; height: 5rem;" role="status">
+        <div class="dash-card dash-loading">
+            <div class="spinner-border" style="color: var(--dash-primary);" role="status">
                 <span class="visually-hidden">Loading...</span>
             </div>
+            <p class="text-muted mb-0">Loading dashboard…</p>
         </div>
     }
 </div>

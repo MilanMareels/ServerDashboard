@@ -1,72 +1,160 @@
-﻿@page "/infrastructure"
+@page "/infrastructure"
 @rendermode InteractiveServer
 
 <PageTitle>Server Infrastructuur</PageTitle>
 
-<div class="container-fluid bg-light p-3 p-md-5">
-    <h1 class="display-5 fw-bold text-dark text-uppercase mb-4">Proxmox Infrastructure Overview</h1>
+<div class="dash-page">
+    <header class="dash-header">
+        <div>
+            <div class="dash-eyebrow">Proxmox Cluster</div>
+            <h1 class="dash-title">Infrastructure</h1>
+            <p class="dash-subtitle">Nodes, hardware capacity and virtual machines</p>
+        </div>
+        @if (nodes != null && nodes.Any())
+        {
+            <span class="dash-chip">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M4.5 5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1M3 4.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0" />
+                    <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2H8.5v3a1.5 1.5 0 0 1 1.5 1.5h5.5a.5.5 0 0 1 0 1H10A1.5 1.5 0 0 1 8.5 14h-1A1.5 1.5 0 0 1 6 12.5H.5a.5.5 0 0 1 0-1H6A1.5 1.5 0 0 1 7.5 10V7H2a2 2 0 0 1-2-2zm1 0v1a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1zm6 7.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5" />
+                </svg>
+                @nodes.Count node@(nodes.Count == 1 ? "" : "s") · @nodes.Sum(n => n.VirtualMachines.Count) VM@(nodes.Sum(n => n.VirtualMachines.Count) == 1 ? "" : "s")
+            </span>
+        }
+    </header>
 
     @if (nodes == null)
     {
-        <div class="spinner-border text-primary" role="status"></div>
+        <div class="dash-card dash-loading">
+            <div class="spinner-border" style="color: var(--dash-primary);" role="status"></div>
+            <p class="text-muted mb-0">Loading infrastructure…</p>
+        </div>
+    }
+    else if (!nodes.Any())
+    {
+        <div class="dash-card dash-empty">
+            <span class="dash-card__icon dash-card__icon--indigo mx-auto mb-3" style="width:3.5rem;height:3.5rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style="width:1.5rem;height:1.5rem;">
+                    <path d="M4.5 5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1M3 4.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0" />
+                    <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2H8.5v3a1.5 1.5 0 0 1 1.5 1.5h5.5a.5.5 0 0 1 0 1H10A1.5 1.5 0 0 1 8.5 14h-1A1.5 1.5 0 0 1 6 12.5H.5a.5.5 0 0 1 0-1H6A1.5 1.5 0 0 1 7.5 10V7H2a2 2 0 0 1-2-2zm1 0v1a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1zm6 7.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5" />
+                </svg>
+            </span>
+            <h4 class="fw-bold">No nodes found</h4>
+            <p class="text-muted mb-0">There are currently no Proxmox nodes registered. Add your first node below to get started.</p>
+        </div>
     }
     else
     {
-        @if (!nodes.Any())
+        @foreach (var node in nodes)
         {
-            <div class="alert alert-info shadow-sm rounded-4 p-4 mb-4">
-                <h4 class="alert-heading fw-bold">No nodes found!</h4>
-                <p class="mb-0">There are currently no Proxmox nodes registered in the system. Add your first node below to get started.</p>
-            </div>
-        }
-        else
-        {
-            @foreach (var node in nodes)
-            {
-                <div class="card shadow border-0 rounded-4 mb-5 p-4">
-                    <h2 class="text-primary border-bottom pb-2">@node.Name</h2>
+            var usage = GetUsage(node.Id);
+            var ramPct = PercentOf(usage.RamGb, node.RamGb);
+            var corePct = PercentOf(usage.Cores, node.Cores);
+            var storagePct = PercentOf(usage.StorageGb, node.StorageGb);
 
-                    <div class="bg-primary bg-opacity-10 border-start border-5 border-primary p-3 my-3 rounded-end">
-                        <div class="mb-2">
-                            <strong>Hardware Capacity:</strong>
-                            <span class="badge bg-purple ms-2" style="background-color: #8e44ad;">@node.RamGb GB RAM</span>
-                            <span class="badge bg-info">@node.Cores Cores</span>
-                            <span class="badge bg-success">@node.StorageGb GB Storage</span>
-                        </div>
- 
+            <section class="dash-card dash-node-card">
+                <header class="dash-node-card__head">
+                    <div class="dash-node-card__identity">
+                        <span class="dash-card__icon dash-card__icon--indigo" style="width:2.75rem;height:2.75rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M4.5 5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1M3 4.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0" />
+                                <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2H8.5v3a1.5 1.5 0 0 1 1.5 1.5h5.5a.5.5 0 0 1 0 1H10A1.5 1.5 0 0 1 8.5 14h-1A1.5 1.5 0 0 1 6 12.5H.5a.5.5 0 0 1 0-1H6A1.5 1.5 0 0 1 7.5 10V7H2a2 2 0 0 1-2-2zm1 0v1a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1zm6 7.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5" />
+                            </svg>
+                        </span>
                         <div>
-                            <strong>Total Hardware Usage:</strong>
-                            @if (@GetUsage(node.Id).RamGb <= @node.RamGb)
-                            {
-                                <span class="badge bg-purple ms-2" style="background-color: #8e44ad;">@GetUsage(node.Id).RamGb GB RAM</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-danger ms-2">@GetUsage(node.Id).RamGb GB RAM</span>
-                            }
-                            @if (@GetUsage(node.Id).Cores <= @node.Cores)
-                            {
-                                <span class="badge bg-info ms-1">@GetUsage(node.Id).Cores Cores</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-danger ms-1">@GetUsage(node.Id).Cores Cores</span>
-                            }
-                            @if (@GetUsage(node.Id).StorageGb < node.StorageGb)
-                            {
-                                <span class="badge bg-success ms-1">@GetUsage(node.Id).StorageGb GB Storage</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-danger ms-1">@GetUsage(node.Id).StorageGb GB Storage</span>
-                            }
+                            <h2>@node.Name</h2>
+                            <div class="mt-1">
+                                <span class="dash-badge dash-badge--info">@node.VirtualMachines.Count VM@(node.VirtualMachines.Count == 1 ? "" : "s")</span>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+
+                <div class="dash-node-card__body">
+                    <div class="dash-metrics">
+                        <div class="dash-metric">
+                            <div class="dash-metric__top">
+                                <span class="dash-metric__icon dash-metric__icon--ram">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                                        <path d="M1 3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v2H1V3zm13 3H1v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6zM5 7.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm4 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zM5 11a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v.5H5v-.5zm4 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v.5H9v-.5z"/>
+                                    </svg>
+                                </span>
+                                <span class="dash-metric__label">RAM</span>
+                            </div>
+                            <div class="dash-metric__value @(IsOver(usage.RamGb, node.RamGb) ? "text-danger" : "")">
+                                @usage.RamGb <small>/ @node.RamGb GB</small>
+                            </div>
+                            <div class="dash-progress">
+                                <div class="dash-progress__bar is-@BarClass(usage.RamGb, node.RamGb)" style="width: @(Math.Min(ramPct, 100))%"></div>
+                            </div>
+                            <div class="dash-metric__foot">
+                                <span>@ramPct% used</span>
+                                @if (IsOver(usage.RamGb, node.RamGb))
+                                {
+                                    <span class="text-danger">Over-provisioned</span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="dash-metric">
+                            <div class="dash-metric__top">
+                                <span class="dash-metric__icon dash-metric__icon--core">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                                        <path d="M5 0a.5.5 0 0 1 .5.5V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2h1V.5a.5.5 0 0 1 1 0V2A2.5 2.5 0 0 1 14 4.5h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14v1h1.5a.5.5 0 0 1 0 1H14a2.5 2.5 0 0 1-2.5 2.5v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14h-1v1.5a.5.5 0 0 1-1 0V14A2.5 2.5 0 0 1 2 11.5H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2v-1H.5a.5.5 0 0 1 0-1H2A2.5 2.5 0 0 1 4.5 2V.5A.5.5 0 0 1 5 0zm-.5 3A1.5 1.5 0 0 0 3 4.5v7A1.5 1.5 0 0 0 4.5 13h7a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 11.5 3h-7zM5 6.5A1.5 1.5 0 0 1 6.5 5h3A1.5 1.5 0 0 1 11 6.5v3A1.5 1.5 0 0 1 9.5 11h-3A1.5 1.5 0 0 1 5 9.5v-3zM6.5 6a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3z"/>
+                                    </svg>
+                                </span>
+                                <span class="dash-metric__label">Cores</span>
+                            </div>
+                            <div class="dash-metric__value @(IsOver(usage.Cores, node.Cores) ? "text-danger" : "")">
+                                @usage.Cores <small>/ @node.Cores cores</small>
+                            </div>
+                            <div class="dash-progress">
+                                <div class="dash-progress__bar is-@BarClass(usage.Cores, node.Cores)" style="width: @(Math.Min(corePct, 100))%"></div>
+                            </div>
+                            <div class="dash-metric__foot">
+                                <span>@corePct% used</span>
+                                @if (IsOver(usage.Cores, node.Cores))
+                                {
+                                    <span class="text-danger">Over-provisioned</span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="dash-metric">
+                            <div class="dash-metric__top">
+                                <span class="dash-metric__icon dash-metric__icon--disk">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                                        <path d="M0 10a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-1zm2.5 1a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1h-2zm4.5 0a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1h-2z"/>
+                                        <path d="M.91 7.204A2.993 2.993 0 0 1 2 7h12c.384 0 .752.072 1.09.204l-1.867-3.422A1.5 1.5 0 0 0 11.906 3H4.094a1.5 1.5 0 0 0-1.317.782L.91 7.204z"/>
+                                    </svg>
+                                </span>
+                                <span class="dash-metric__label">Storage</span>
+                            </div>
+                            <div class="dash-metric__value @(IsOver(usage.StorageGb, node.StorageGb) ? "text-danger" : "")">
+                                @Fmt(usage.StorageGb) <small>/ @node.StorageGb GB</small>
+                            </div>
+                            <div class="dash-progress">
+                                <div class="dash-progress__bar is-@BarClass(usage.StorageGb, node.StorageGb)" style="width: @(Math.Min(storagePct, 100))%"></div>
+                            </div>
+                            <div class="dash-metric__foot">
+                                <span>@storagePct% used</span>
+                                @if (IsOver(usage.StorageGb, node.StorageGb))
+                                {
+                                    <span class="text-danger">Over-provisioned</span>
+                                }
+                            </div>
                         </div>
                     </div>
 
-                    <h3 class="text-secondary mt-4">Virtual Machines</h3>
-                    <div class="table-responsive">
-                        <table class="table table-hover table-bordered">
-                            <thead class="table-light">
+                    <h3 class="dash-section-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5 8 5.961 14.154 3.5 8.186 1.113zM15 4.239l-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923l6.5 2.6zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.629 13.09a1 1 0 0 1-.629-.928V3.5a.5.5 0 0 1 .314-.464L7.443.184z"/>
+                        </svg>
+                        Virtual Machines
+                    </h3>
+
+                    <div class="dash-table-wrap table-responsive">
+                        <table class="dash-table align-middle">
+                            <thead>
                                 <tr>
                                     <th>VM Name</th>
                                     <th>RAM (GB)</th>
@@ -82,14 +170,24 @@
                                     @foreach (var vm in node.VirtualMachines)
                                     {
                                         <tr>
-                                            <td><strong>@vm.Name</strong></td>
+                                            <td class="fw-bold">@vm.Name</td>
                                             <td>@vm.RamGb GB</td>
                                             <td>@vm.Cores</td>
-                                            <td>@vm.StorageGb GB</td>
-                                            <td>@vm.Notes</td>
-                                            <td>
-                                                <button class="btn btn-sm btn-warning" @onclick="() => EditVm(vm)">Edit</button>
-                                                <button class="btn btn-sm btn-danger" @onclick="() => DeleteVm(vm.Id)">Delete</button>
+                                            <td>@Fmt(vm.StorageGb) GB</td>
+                                            <td class="text-muted">@(string.IsNullOrWhiteSpace(vm.Notes) ? "—" : vm.Notes)</td>
+                                            <td style="white-space:nowrap;">
+                                                <button class="btn btn-sm btn-outline-secondary dash-btn-icon me-1" @onclick="() => EditVm(vm)">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                                                        <path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.5.5 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/>
+                                                    </svg>
+                                                    Edit
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger dash-btn-icon" @onclick="() => DeleteVm(vm.Id)">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                                                        <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/>
+                                                    </svg>
+                                                    Delete
+                                                </button>
                                             </td>
                                         </tr>
                                     }
@@ -97,86 +195,135 @@
                                 else
                                 {
                                     <tr>
-                                        <td colspan="6" class="text-center text-muted">No virtual machines found on this node.</td>
+                                        <td colspan="6" class="text-center text-muted py-5">No virtual machines found on this node.</td>
                                     </tr>
                                 }
                             </tbody>
                         </table>
                     </div>
                 </div>
-            }
+            </section>
         }
 
         @if (nodes.Any())
         {
-            <div class="card shadow border-0 rounded-4 p-4 mt-4">
-                <h3 class="text-secondary fw-bold mb-3">@(isEditing ? "Edit VM" : "Add New VM")</h3>
+            <div class="dash-card dash-form-card">
+                <div class="dash-card__header">
+                    <span class="dash-card__icon dash-card__icon--purple">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5 8 5.961 14.154 3.5 8.186 1.113zM15 4.239l-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923l6.5 2.6zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.629 13.09a1 1 0 0 1-.629-.928V3.5a.5.5 0 0 1 .314-.464L7.443.184z"/>
+                        </svg>
+                    </span>
+                    <h3 class="fw-bold mb-0" style="font-size:1.05rem;">@(isEditing ? "Edit Virtual Machine" : "Add New Virtual Machine")</h3>
+                </div>
+
                 <EditForm Model="currentVm" OnValidSubmit="SaveVm">
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <label class="fw-semibold">VM Name</label>
-                            <InputText @bind-Value="currentVm.Name" class="form-control" />
+                            <div class="dash-field">
+                                <label for="vm-name">VM Name</label>
+                                <InputText id="vm-name" @bind-Value="currentVm.Name" class="form-control" placeholder="E.g., web-01" />
+                            </div>
                         </div>
                         <div class="col-md-2">
-                            <label class="fw-semibold">RAM (GB)</label>
-                            <InputNumber @bind-Value="currentVm.RamGb" class="form-control" />
+                            <div class="dash-field">
+                                <label for="vm-ram">RAM (GB)</label>
+                                <InputNumber id="vm-ram" @bind-Value="currentVm.RamGb" class="form-control" />
+                            </div>
                         </div>
                         <div class="col-md-2">
-                            <label class="fw-semibold">Cores</label>
-                            <InputNumber @bind-Value="currentVm.Cores" class="form-control" />
+                            <div class="dash-field">
+                                <label for="vm-cores">Cores</label>
+                                <InputNumber id="vm-cores" @bind-Value="currentVm.Cores" class="form-control" />
+                            </div>
                         </div>
                         <div class="col-md-2">
-                            <label class="fw-semibold">Storage (GB)</label>
-                            <InputNumber @bind-Value="currentVm.StorageGb" class="form-control" />
+                            <div class="dash-field">
+                                <label for="vm-storage">Storage (GB)</label>
+                                <InputNumber id="vm-storage" @bind-Value="currentVm.StorageGb" class="form-control" />
+                            </div>
                         </div>
                         <div class="col-md-2">
-                            <label class="fw-semibold">Select Node</label>
-                            <InputSelect @bind-Value="currentVm.ProxmoxNodeId" class="form-select">
-                                <option value="0">Select...</option>
-                                @foreach (var n in nodes)
-                                {
-                                    <option value="@n.Id">@n.Name</option>
-                                }
-                            </InputSelect>
+                            <div class="dash-field">
+                                <label for="vm-node">Select Node</label>
+                                <InputSelect id="vm-node" @bind-Value="currentVm.ProxmoxNodeId" class="form-select">
+                                    <option value="0">Select...</option>
+                                    @foreach (var n in nodes)
+                                    {
+                                        <option value="@n.Id">@n.Name</option>
+                                    }
+                                </InputSelect>
+                            </div>
                         </div>
                         <div class="col-md-12">
-                            <label class="fw-semibold">Notes</label>
-                            <InputText @bind-Value="currentVm.Notes" class="form-control" />
+                            <div class="dash-field">
+                                <label for="vm-notes">Notes</label>
+                                <InputText id="vm-notes" @bind-Value="currentVm.Notes" class="form-control" placeholder="Optional notes…" />
+                            </div>
                         </div>
                     </div>
-                    <div class="mt-3">
-                        <button type="submit" class="btn btn-success px-4 shadow-sm">Save VM</button>
+                    <div class="mt-3 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary px-4 dash-btn-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z"/>
+                            </svg>
+                            Save VM
+                        </button>
                         @if (isEditing)
                         {
-                            <button type="button" class="btn btn-secondary px-4 shadow-sm ms-2" @onclick="ResetForm">Cancel</button>
+                            <button type="button" class="btn btn-secondary px-4" @onclick="ResetForm">Cancel</button>
                         }
                     </div>
                 </EditForm>
             </div>
         }
 
-        <div class="card shadow border-0 rounded-4 p-4 mt-4 bg-primary bg-opacity-10">
-            <h3 class="text-primary text-uppercase fw-bold mb-3">Add New Node</h3>
+        <div class="dash-card dash-form-card">
+            <div class="dash-card__header">
+                <span class="dash-card__icon dash-card__icon--indigo">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M4.5 5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1M3 4.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0" />
+                        <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1a2 2 0 0 1-2 2H8.5v3a1.5 1.5 0 0 1 1.5 1.5h5.5a.5.5 0 0 1 0 1H10A1.5 1.5 0 0 1 8.5 14h-1A1.5 1.5 0 0 1 6 12.5H.5a.5.5 0 0 1 0-1H6A1.5 1.5 0 0 1 7.5 10V7H2a2 2 0 0 1-2-2zm1 0v1a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1zm6 7.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5" />
+                    </svg>
+                </span>
+                <h3 class="fw-bold mb-0" style="font-size:1.05rem;">Add New Node</h3>
+            </div>
+
             <EditForm Model="currentNode" OnValidSubmit="SaveNode">
                 <div class="row g-3">
                     <div class="col-md-3">
-                        <label class="fw-semibold">Node Name</label>
-                        <InputText @bind-Value="currentNode.Name" class="form-control" placeholder="E.g., PVE3" />
+                        <div class="dash-field">
+                            <label for="node-name">Node Name</label>
+                            <InputText id="node-name" @bind-Value="currentNode.Name" class="form-control" placeholder="E.g., PVE3" />
+                        </div>
                     </div>
                     <div class="col-md-3">
-                        <label class="fw-semibold">RAM (GB)</label>
-                        <InputNumber @bind-Value="currentNode.RamGb" class="form-control" />
+                        <div class="dash-field">
+                            <label for="node-ram">RAM (GB)</label>
+                            <InputNumber id="node-ram" @bind-Value="currentNode.RamGb" class="form-control" />
+                        </div>
                     </div>
                     <div class="col-md-3">
-                        <label class="fw-semibold">Cores</label>
-                        <InputNumber @bind-Value="currentNode.Cores" class="form-control" />
+                        <div class="dash-field">
+                            <label for="node-cores">Cores</label>
+                            <InputNumber id="node-cores" @bind-Value="currentNode.Cores" class="form-control" />
+                        </div>
                     </div>
                     <div class="col-md-3">
-                        <label class="fw-semibold">Storage (GB)</label>
-                        <InputNumber @bind-Value="currentNode.StorageGb" class="form-control" />
+                        <div class="dash-field">
+                            <label for="node-storage">Storage (GB)</label>
+                            <InputNumber id="node-storage" @bind-Value="currentNode.StorageGb" class="form-control" />
+                        </div>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary mt-3 px-4 shadow-sm">Save Node</button>
+                <div class="mt-3">
+                    <button type="submit" class="btn btn-primary px-4 dash-btn-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z"/>
+                        </svg>
+                        Save Node
+                    </button>
+                </div>
             </EditForm>
         </div>
     }
