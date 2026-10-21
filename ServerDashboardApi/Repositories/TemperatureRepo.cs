@@ -49,9 +49,16 @@ namespace ServerDashboardApi.Repositories
                 .ToListAsync();
         }
 
-        public void GetHistory()
+        public async Task<IEnumerable<TempertureDTO>> GetHistory()
         {
-            throw new NotImplementedException();
+            return await _context.Tempertures.Select(x => new TempertureDTO()
+            {
+                Temp = x.Temp,
+                Date = x.Date,
+                TopFans = x.TopFans,
+                BottomFans = x.BottomFans
+            })
+            .ToListAsync();
         }
     }
 }

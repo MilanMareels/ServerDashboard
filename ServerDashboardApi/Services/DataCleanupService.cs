@@ -19,8 +19,8 @@ namespace ServerDashboardApi.Services
                     var db = scope.ServiceProvider.GetRequiredService<DashBoardContext>();
 
                     _logger.LogInformation("Cleanup round completed. Wait until next round (10 min).");
-                    await CleanupTemperatures(db);
-                    await CleanupEvents(db);
+                    //await CleanupTemperatures(db);
+                    //await CleanupEvents(db);
 
                     await Task.Delay(TimeSpan.FromMinutes(10), stoppingToken);
                 }

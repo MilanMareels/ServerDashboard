@@ -1,5 +1,4 @@
 ﻿using ServerDashboardApi.DTOs;
-using ServerDashboardApi.Models;
 
 namespace ServerDashboardApi.Repositories
 {
@@ -7,6 +6,6 @@ namespace ServerDashboardApi.Repositories
     {
         DashBoardDTO GetFullDashBoard();
         Task<IEnumerable<EventDTO>> GetEvents();
-        void GetHistory();
+        Task<IEnumerable<TempertureDTO>> GetHistory();
     }
 }

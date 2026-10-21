@@ -86,6 +86,28 @@ namespace ServerDashboardClient.Components.Pages
             };
         }
 
+        // ---- Presentation helpers for the UI ----
+        private int PercentOf(double used, double total)
+        {
+            return total <= 0 ? 0 : (int)Math.Round(used / total * 100);
+        }
+
+        private string BarClass(double used, double total)
+        {
+            var percent = PercentOf(used, total);
+            return percent >= 90 ? "danger" : percent >= 70 ? "warning" : "success";
+        }
+
+        private bool IsOver(double used, double total)
+        {
+            return used > total;
+        }
+
+        private string Fmt(double value)
+        {
+            return value == Math.Floor(value) ? value.ToString("0") : value.ToString("0.#");
+        }
+
         private void ResetForm()
         {
             currentVm = new VirtualMachineDTO();

@@ -49,5 +49,27 @@ namespace ServerDashboardClient.Components.Pages
             _timer?.Dispose();
             _cts.Dispose();
         }
+
+        // ---- Presentation helpers for the UI ----
+        public bool IsHighTemp => dashBoard != null && dashBoard.Temp >= 25;
+        public string TempStatus => IsHighTemp ? "High" : "Normal";
+        public string TempValueClass => IsHighTemp ? "dash-temp--high" : "dash-temp--normal";
+        public string TempPillClass => IsHighTemp ? "dash-pill--danger" : "dash-pill--success";
+
+        public int TempPercent
+        {
+            get
+            {
+                if (dashBoard == null || dashBoard.MaxTemp <= dashBoard.MinTemp)
+                {
+                    return 50;
+                }
+
+                return Math.Clamp(
+                    (int)Math.Round((dashBoard.Temp - dashBoard.MinTemp) / (double)(dashBoard.MaxTemp - dashBoard.MinTemp) * 100),
+                    0,
+                    100);
+            }
+        }
     }
 }
