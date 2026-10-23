@@ -1,4 +1,4 @@
-﻿using ServerDashboardApi.DTOs;
+using ServerDashboardApi.DTOs;
 
 namespace ServerDashboardClient.Services
 {
@@ -18,6 +18,11 @@ namespace ServerDashboardClient.Services
         public async Task<IEnumerable<EventDTO>> GetEvents()
         {
             return await _httpClient.GetFromJsonAsync<IEnumerable<EventDTO>>("Temperature/Events");
+        }
+
+        public async Task<IEnumerable<TempertureDTO>> GetHistory()
+        {
+            return await _httpClient.GetFromJsonAsync<IEnumerable<TempertureDTO>>("Temperature/History");
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using ServerDashboardApi.DTOs;
+using ServerDashboardApi.DTOs;
 
 namespace ServerDashboardClient.Services
 {
@@ -6,5 +6,6 @@ namespace ServerDashboardClient.Services
     {
         Task<DashBoardDTO> GetFullDashBoard();
         Task<IEnumerable<EventDTO>> GetEvents();
+        Task<IEnumerable<TempertureDTO>> GetHistory();
     }
 }

@@ -22,10 +22,10 @@ namespace ServerDashboardClient.Components.Pages
             _ = StartAutoRefreshAsync();
         }
 
-        // Refresh every 1 sec, get api data every 1 sec.
+        // Refresh every 30 sec, get api data every 30 sec.
         private async Task StartAutoRefreshAsync()
         {
-            _timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
+            _timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
 
             try
             {
@@ -42,7 +42,6 @@ namespace ServerDashboardClient.Components.Pages
             }
         }
 
-        // When Page closes Timer cancels. Clean up.
         public void Dispose()
         {
             _cts.Cancel();
@@ -50,7 +49,6 @@ namespace ServerDashboardClient.Components.Pages
             _cts.Dispose();
         }
 
-        // ---- Presentation helpers for the UI ----
         public bool IsHighTemp => dashBoard != null && dashBoard.Temp >= 25;
         public string TempStatus => IsHighTemp ? "High" : "Normal";
         public string TempValueClass => IsHighTemp ? "dash-temp--high" : "dash-temp--normal";
