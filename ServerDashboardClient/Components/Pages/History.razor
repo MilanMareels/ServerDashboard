@@ -1,7 +1,84 @@
-﻿@page "/history"
+@page "/history"
+@using ChartJs.Blazor.Common
+@using ChartJs.Blazor.Common.Axes
+@using ChartJs.Blazor.Common.Enums
+@using ChartJs.Blazor.LineChart
+@using ChartJs.Blazor.Util
+@rendermode InteractiveServer
 
-<h3>History</h3>
+<Chart Config="_config"></Chart>
 
-@code {
+@code{
+    private LineConfig _config;
 
+    protected override void OnInitialized()
+    {
+        _config = new LineConfig
+        {
+            Options = new LineOptions
+            {
+                Responsive = true,
+                Title = new OptionsTitle
+                {
+                    Display = true,
+                    Text = "Temps"
+                },
+                Tooltips = new Tooltips
+                {
+                    Mode = InteractionMode.Point,
+                    Intersect = true
+                },
+                Hover = new Hover
+                {
+                    Mode = InteractionMode.Index,
+                    Intersect = true
+                },
+                Scales = new Scales
+                {
+                    XAxes = new List<CartesianAxis>
+                    {
+                        new CategoryAxis
+                        {
+                            ScaleLabel = new ScaleLabel
+                            {
+                                LabelString = "Month"
+                            }
+                        }
+                    },
+                    YAxes = new List<CartesianAxis>
+                    {
+                        new LinearCartesianAxis
+                        {
+                            ScaleLabel = new ScaleLabel
+                            {
+                                LabelString = "Value"
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        List<int> items = new List<int>()
+        {
+            100,
+            245,
+            344,
+            346,
+            36,
+            1000,
+            1000
+        };
+
+        IDataset<int> dataset1 = new LineDataset<int>(items)
+        {
+            Label = "My first dataset",
+
+            BackgroundColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Red),
+            BorderColor = ColorUtil.FromDrawingColor(System.Drawing.Color.Red),
+            Fill = FillingMode.Disabled,
+        };
+
+        _config.Data.Datasets.Add(dataset1);
+    }
 }
