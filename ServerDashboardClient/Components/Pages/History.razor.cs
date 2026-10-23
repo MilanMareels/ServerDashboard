@@ -1,4 +1,6 @@
 using ChartJs.Blazor.Common;
+using ChartJs.Blazor.Common.Axes;
+using ChartJs.Blazor.Common.Axes.Ticks;
 using ChartJs.Blazor.Common.Enums;
 using ChartJs.Blazor.LineChart;
 using Microsoft.AspNetCore.Components;
@@ -31,7 +33,7 @@ namespace ServerDashboardClient.Components.Pages
                     Title = new OptionsTitle
                     {
                         Display = true,
-                        Text = "Temperatures history"
+                        Text = "Server Rack Temperature History"
                     },
                     Tooltips = new Tooltips
                     {
@@ -42,6 +44,36 @@ namespace ServerDashboardClient.Components.Pages
                     {
                         Mode = InteractionMode.Index,
                         Intersect = true
+                    },
+
+                    Scales = new Scales
+                    {
+                        XAxes = new List<CartesianAxis>
+                        {
+                            new CategoryAxis
+                            {
+                                ScaleLabel = new ScaleLabel
+                                {
+                                    Display = true,
+                                    LabelString = "Date and Time"
+                                }
+                            }
+                        },
+                                            YAxes = new List<CartesianAxis>
+                        {
+                            new LinearCartesianAxis
+                            {
+                                ScaleLabel = new ScaleLabel
+                                {
+                                    Display = true,
+                                    LabelString = "Temperature (°C)"
+                                },
+                                Ticks = new LinearCartesianTicks
+                                {
+                                    BeginAtZero = false
+                                }
+                            }
+                        }
                     }
                 }
             };
@@ -53,9 +85,10 @@ namespace ServerDashboardClient.Components.Pages
 
             IDataset<int> dataset = new LineDataset<int>(data.Select(x => x.Temp))
             {
-                Label = "Temperature",
+                Label = "Temperature (°C)",
                 BackgroundColor = "#4f46e5",
                 BorderColor = "#4f46e5",
+                BorderWidth = 2,
                 Fill = FillingMode.Disabled,
             };
 
