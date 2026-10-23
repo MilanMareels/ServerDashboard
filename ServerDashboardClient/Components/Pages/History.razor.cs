@@ -12,7 +12,6 @@ namespace ServerDashboardClient.Components.Pages
         [Inject]
         public ITemperatureService _temperatureService { get; set; }
 
-        private const int MaxAmountOfItemToShow = 20;
         private LineConfig _config;
         public IEnumerable<TempertureDTO>? data { get; set; }
 
@@ -24,8 +23,6 @@ namespace ServerDashboardClient.Components.Pages
 
         public void BuildLineChart()
         {
-            var items = data!.Take(MaxAmountOfItemToShow).ToList();
-
             _config = new LineConfig
             {
                 Options = new LineOptions
@@ -49,12 +46,12 @@ namespace ServerDashboardClient.Components.Pages
                 }
             };
 
-            foreach (var item in items)
+            foreach (var item in data)
             {
                 _config.Data.Labels.Add(item.Date.ToString("dd/MM HH:mm"));
             }
 
-            IDataset<int> dataset = new LineDataset<int>(items.Select(x => x.Temp))
+            IDataset<int> dataset = new LineDataset<int>(data.Select(x => x.Temp))
             {
                 Label = "Temperature",
                 BackgroundColor = "#4f46e5",
