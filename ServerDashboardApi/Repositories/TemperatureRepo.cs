@@ -52,6 +52,7 @@ namespace ServerDashboardApi.Repositories
         public async Task<IEnumerable<TempertureDTO>> GetHistory()
         {
             return await _context.Tempertures
+                .OrderByDescending(x => x.Date)
                 .Take(20)
                 .Select(x => new TempertureDTO()
                 {

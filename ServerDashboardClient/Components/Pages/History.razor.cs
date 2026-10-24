@@ -59,7 +59,7 @@ namespace ServerDashboardClient.Components.Pages
                                 }
                             }
                         },
-                                            YAxes = new List<CartesianAxis>
+                        YAxes = new List<CartesianAxis>
                         {
                             new LinearCartesianAxis
                             {
